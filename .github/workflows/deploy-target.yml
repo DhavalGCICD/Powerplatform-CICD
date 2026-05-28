@@ -26,8 +26,8 @@ jobs:
       uses: microsoft/powerplatform-actions/pack-solution@v1
       with:
         solution-folder: 'solutions/${{ env.SOLUTION_NAME }}'
-        solution-file: '${{ env.SOLUTION_NAME }}_managed.zip'
-        solution-type: 'Both'
+        solution-file: '${{ env.SOLUTION_NAME }}.zip'
+        solution-type: 'Unmanaged'
 
     # 2. Import the managed zip file directly into the Test environment
     - name: Import Solution to Test Environment

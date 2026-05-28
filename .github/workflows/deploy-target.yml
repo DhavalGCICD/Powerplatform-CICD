@@ -21,6 +21,13 @@ jobs:
     - name: Install Power Platform Tools
       uses: microsoft/powerplatform-actions/actions-install@v1
 
+      # Clear out any old cached zip packages from prior runs
+    - name: Clean Workspace Packages
+      run: |
+        if (Test-Path "${{ env.SOLUTION_NAME }}.zip") { Remove-Item "${{ env.SOLUTION_NAME }}.zip" -Force }
+        if (Test-Path "${{ env.SOLUTION_NAME }}_managed.zip") { Remove-Item "${{ env.SOLUTION_NAME }}_managed.zip" -Force }
+      shell: powershell
+
     # 1. Pack the source code files back into a Managed Zip file
     - name: Pack Solution as Managed
       uses: microsoft/powerplatform-actions/pack-solution@v1

@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'solutions/DeploymentTestSol/**' # Only triggers if files in this specific solution folder change
+      - 'solutions/DeploymentTestSol/**'
 
 env:
   SOLUTION_NAME: 'DeploymentTestSol'
@@ -33,7 +33,7 @@ jobs:
       uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: ${{ secrets.TEST_ENVIRONMENT_URL }}
-        client-id: ${{ secrets.PP_CLIENT_ID }}
+        app-id: ${{ secrets.PP_CLIENT_ID }} # Fixed from client-id to app-id
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
         solution-file: '${{ env.SOLUTION_NAME }}_managed.zip'

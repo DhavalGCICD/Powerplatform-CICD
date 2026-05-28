@@ -1,18 +1,18 @@
-name: 2-Pack-and-Deploy-Target
+name: Export-Track-And-Deploy
+
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'solutions/DeploymentTestSol/**'
-  workflow_dispatch: # <--- This adds a manual "Run workflow" button
+  workflow_dispatch:
+    inputs:
+      solution_name:
+        description: 'Solution Unique Name'
+        required: true
+        default: 'DeploymentTestSol'
 
-
-env:
-  SOLUTION_NAME: 'DeploymentTestSol'
+permissions:
+  contents: write
 
 jobs:
-  deploy:
+  alm-orchestrator:
     runs-on: windows-latest
     steps:
     - name: Checkout Repository
@@ -21,30 +21,58 @@ jobs:
     - name: Install Power Platform Tools
       uses: microsoft/powerplatform-actions/actions-install@v1
 
-      # Clear out any old cached zip packages from prior runs
-   # - name: Clean Workspace Packages
-    #  run: |
-     #   if (Test-Path "${{ env.SOLUTION_NAME }}.zip") { Remove-Item "${{ env.SOLUTION_NAME }}.zip" -Force }
-       # if (Test-Path "${{ env.SOLUTION_NAME }}_managed.zip") { Remove-Item "${{ env.SOLUTION_NAME }}_managed.zip" -Force }
-      #shell: powershell
-
-    # 1. Pack the source code files back into a Managed Zip file
-    - name: Pack Solution as Managed
-      uses: microsoft/powerplatform-actions/pack-solution@v1
+    # 1. Export Unmanaged for GitHub Source Tracking
+    - name: Export Unmanaged Source
+      uses: microsoft/powerplatform-actions/export-solution@v1
       with:
-        solution-folder: 'solutions/${{ env.SOLUTION_NAME }}'
-        solution-file: '${{ env.SOLUTION_NAME }}.zip'
-        solution-type: 'Managed'
+        environment-url: ${{ secrets.DEV_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.PP_CLIENT_ID }}
+        tenant-id: ${{ secrets.PP_TENANT_ID }}
+        client-secret: ${{ secrets.PP_CLIENT_SECRET }}
+        solution-name: ${{ github.event.inputs.solution_name }}
+        solution-output-file: '${{ github.event.inputs.solution_name }}_unmanaged.zip'
 
-    # 2. Import the managed zip file directly into the Test environment
-    - name: Import Solution to Test Environment
+    # 2. Unpack the code files so you can track line-by-line changes
+    - name: Unpack Solution Files
+      uses: microsoft/powerplatform-actions/unpack-solution@v1
+      with:
+        solution-file: '${{ github.event.inputs.solution_name }}_unmanaged.zip'
+        solution-folder: 'solutions/${{ github.event.inputs.solution_name }}'
+        solution-type: 'Unmanaged'
+        overwrite-files: true
+
+    # 3. Export Managed version directly for immediate deployment
+    - name: Export Deployment Package (Managed)
+      uses: microsoft/powerplatform-actions/export-solution@v1
+      with:
+        environment-url: ${{ secrets.DEV_ENVIRONMENT_URL }}
+        app-id: ${{ secrets.PP_CLIENT_ID }}
+        tenant-id: ${{ secrets.PP_TENANT_ID }}
+        client-secret: ${{ secrets.PP_CLIENT_SECRET }}
+        solution-name: ${{ github.event.inputs.solution_name }}
+        solution-output-file: '${{ github.event.inputs.solution_name }}_managed.zip'
+        managed: true
+
+    # 4. Push the managed deployment package directly into your Test environment
+    - name: Import Managed Solution to Test
       uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: ${{ secrets.TEST_ENVIRONMENT_URL }}
-        app-id: ${{ secrets.PP_CLIENT_ID }} # Fixed from client-id to app-id
+        app-id: ${{ secrets.PP_CLIENT_ID }}
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
-        solution-file: '${{ env.SOLUTION_NAME }}.zip'
-       # import-as-managed: true # <--- This handles the conversion perfectly
+        solution-file: '${{ github.event.inputs.solution_name }}_managed.zip'
         force-overwrite: true
         publish-changes: true
+
+    # 5. Save the updated tracking code back to GitHub
+    - name: Enable Git Long Paths
+      run: git config --global core.longpaths true
+
+    - name: Commit and Push Source Changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add solutions/${{ github.event.inputs.solution_name }}
+        git commit -m "Automated source sync for solution: ${{ github.event.inputs.solution_name }}"
+        git push

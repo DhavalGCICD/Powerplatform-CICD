@@ -1,11 +1,12 @@
 name: 2-Pack-and-Deploy-Target
-
 on:
   push:
     branches:
       - main
     paths:
       - 'solutions/DeploymentTestSol/**'
+  workflow_dispatch: # <--- This adds a manual "Run workflow" button
+
 
 env:
   SOLUTION_NAME: 'DeploymentTestSol'

@@ -45,6 +45,7 @@ jobs:
         solution-folder: 'solutions/${{ github.event.inputs.solution_name }}'
         solution-type: 'Unmanaged'
         overwrite-files: true
+        process-canvas-apps: false
 
     # 3. Commit back into your GitHub Repository
     - name: Commit and Push to Source Control

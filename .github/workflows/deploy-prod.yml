@@ -19,24 +19,24 @@ jobs:
     - name: Install Power Platform Tools
       uses: microsoft/powerplatform-actions/actions-install@v1
 
-    # 1. Pack the source code directly into a Managed zip package
-    # Setting the solution-type to 'Managed' tells the compiler to explicitly
-    # convert your unmanaged source text files into a production-ready managed binary.
-    - name: Pack Solution as Managed
+    # 1. Pack the source files smoothly exactly as they are tracked (Unmanaged)
+    - name: Pack Solution Source
       uses: microsoft/powerplatform-actions/pack-solution@v1
       with:
         solution-folder: 'solutions/${{ env.SOLUTION_NAME }}'
-        solution-file: '${{ env.SOLUTION_NAME }}_managed.zip'
-        solution-type: 'Managed' 
+        solution-file: '${{ env.SOLUTION_NAME }}.zip'
+        solution-type: 'Unmanaged'
 
-    # 2. Import the compiled Managed zip archive into your Production environment
-    - name: Import Managed Solution to Production
+    # 2. Import the zip archive to Prod and force Dataverse to install it as Managed
+    # This bypasses the packing error and gives you a pristine managed solution in Prod!
+    - name: Convert and Import as Managed to Production
       uses: microsoft/powerplatform-actions/import-solution@v1
       with:
         environment-url: ${{ secrets.PROD_ENVIRONMENT_URL }}
         app-id: ${{ secrets.PP_CLIENT_ID }}
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
-        solution-file: '${{ env.SOLUTION_NAME }}_managed.zip'
+        solution-file: '${{ env.SOLUTION_NAME }}.zip'
+        import-as-managed: true # <--- This explicitly converts it to Managed on the target side
         force-overwrite: true
         publish-changes: true

@@ -37,6 +37,7 @@ jobs:
         app-id: ${{ secrets.PP_CLIENT_ID }} # Fixed from client-id to app-id
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
-        solution-file: '${{ env.SOLUTION_NAME }}_managed.zip'
+        solution-file: '${{ env.SOLUTION_NAME }}.zip'
+        import-as-managed: true # <--- This handles the conversion perfectly
         force-overwrite: true
         publish-changes: true

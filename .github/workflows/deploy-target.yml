@@ -22,11 +22,11 @@ jobs:
       uses: microsoft/powerplatform-actions/actions-install@v1
 
       # Clear out any old cached zip packages from prior runs
-    - name: Clean Workspace Packages
-      run: |
-        if (Test-Path "${{ env.SOLUTION_NAME }}.zip") { Remove-Item "${{ env.SOLUTION_NAME }}.zip" -Force }
-        if (Test-Path "${{ env.SOLUTION_NAME }}_managed.zip") { Remove-Item "${{ env.SOLUTION_NAME }}_managed.zip" -Force }
-      shell: powershell
+   # - name: Clean Workspace Packages
+    #  run: |
+     #   if (Test-Path "${{ env.SOLUTION_NAME }}.zip") { Remove-Item "${{ env.SOLUTION_NAME }}.zip" -Force }
+       # if (Test-Path "${{ env.SOLUTION_NAME }}_managed.zip") { Remove-Item "${{ env.SOLUTION_NAME }}_managed.zip" -Force }
+      #shell: powershell
 
     # 1. Pack the source code files back into a Managed Zip file
     - name: Pack Solution as Managed
@@ -34,7 +34,7 @@ jobs:
       with:
         solution-folder: 'solutions/${{ env.SOLUTION_NAME }}'
         solution-file: '${{ env.SOLUTION_NAME }}.zip'
-        solution-type: 'Unmanaged'
+        solution-type: 'Managed'
 
     # 2. Import the managed zip file directly into the Test environment
     - name: Import Solution to Test Environment
@@ -45,6 +45,6 @@ jobs:
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
         solution-file: '${{ env.SOLUTION_NAME }}.zip'
-        import-as-managed: true # <--- This handles the conversion perfectly
+       # import-as-managed: true # <--- This handles the conversion perfectly
         force-overwrite: true
         publish-changes: true

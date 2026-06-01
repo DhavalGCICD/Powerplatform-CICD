@@ -37,6 +37,6 @@ jobs:
         tenant-id: ${{ secrets.PP_TENANT_ID }}
         client-secret: ${{ secrets.PP_CLIENT_SECRET }}
         solution-file: '${{ env.SOLUTION_NAME }}.zip'
-        import-as-managed: true # <--- This explicitly converts it to Managed on the target side
+        convert-to-managed: true # <--- This explicitly converts it to Managed on the target side
         force-overwrite: true
         publish-changes: true

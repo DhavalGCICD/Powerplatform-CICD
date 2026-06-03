@@ -80,6 +80,7 @@
       </Addresses>
     </Publisher>
     <RootComponents>
+      <RootComponent type="29" id="{b11ebebe-135f-f111-a825-0022486eb22c}" behavior="0" />
       <RootComponent type="300" schemaName="new_deployapp_8bc5a" behavior="0" />
     </RootComponents>
     <MissingDependencies />
